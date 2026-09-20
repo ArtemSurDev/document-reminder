@@ -1,42 +1,86 @@
 from datetime import date
 
-user_name = "Иван Петров"
-document_title = "Паспорт РФ"
-expiry_date = date(2026, 5, 20)
-current_date = date(2026, 4, 25)
-days_before_notify = 30
+from documents import (
+    add_document, find_documents, get_status, format_notification,
+    get_expiring_documents, sort_documents_by_expiry, get_statistics,
+)
+from storage import load_documents, save_documents
+from utils import input_int, input_date, input_str
 
 
-def days_until_expiry(expiry, current):
-    return (expiry - current).days
+USER_NAME = "Иван Петров"
 
 
-def get_status(days_left):
-    if days_left < 0:
-        return "ПРОСРОЧЕН"
-    elif days_left == 0:
-        return "ИСТЕКАЕТ СЕГОДНЯ"
-    elif days_left <= 30:
-        return "ИСТЕКАЕТ СКОРО"
-    else:
-        return "ДЕЙСТВИТЕЛЕН"
+def show_documents(documents: list[dict]) -> None:
+    if not documents:
+        print("Список документов пуст.")
+        return
+    today = date.today()
+    for doc in documents:
+        expiry = date.fromisoformat(doc["expiry"])
+        days_left = (expiry - today).days
+        status = get_status(days_left)
+        print(f"[{doc['id']}] {doc['title']} ({doc['number']}) — "
+              f"до {doc['expiry']} — {status}")
 
 
-def format_notification(user, title, days_left):
-    if days_left < 0:
-        return f"{user}, документ «{title}» просрочен на {abs(days_left)} дн."
-    return f"{user}, до окончания «{title}» осталось {days_left} дн."
+def show_expiring(documents: list[dict]) -> None:
+    expiring = get_expiring_documents(documents, threshold=30)
+    if not expiring:
+        print("Нет документов с ближайшими сроками.")
+        return
+    for doc in expiring:
+        print(f"  {doc['title']}: осталось {doc['days_left']} дн.")
 
 
-days_left = days_until_expiry(expiry_date, current_date)
-status = get_status(days_left)
+def show_statistics(documents: list[dict]) -> None:
+    stats = get_statistics(documents)
+    print(f"Всего: {stats['total']}")
+    print(f"Просрочено: {stats['expired']}")
+    print(f"Истекает скоро: {stats['expiring']}")
+    print(f"Действительно: {stats['valid']}")
 
-print(f"Пользователь: {user_name}")
-print(f"Документ:     {document_title}")
-print(f"До окончания: {days_left} дн.")
-print(f"Статус:       {status}")
 
-if days_left <= days_before_notify:
-    print(format_notification(user_name, document_title, days_left))
-else:
-    print("Напоминание не требуется.")
+def menu() -> None:
+    documents = load_documents()
+    while True:
+        print("\n=== Сервис напоминаний о сроках документов ===")
+        print("1. Показать все документы")
+        print("2. Добавить документ")
+        print("3. Найти документ по названию")
+        print("4. Показать ближайшие сроки")
+        print("5. Показать статистику")
+        print("6. Показать напоминания")
+        print("0. Выход")
+        choice = input_int("Выберите действие: ")
+
+        if choice == 1:
+            show_documents(sort_documents_by_expiry(documents))
+        elif choice == 2:
+            title = input_str("Название документа: ")
+            number = input_str("Номер документа: ")
+            expiry = input_date("Дата окончания (ДД.ММ.ГГГГ): ")
+            add_document(documents, title, number, expiry)
+            save_documents(documents)
+            print("Документ добавлен.")
+        elif choice == 3:
+            query = input_str("Поиск: ")
+            found = find_documents(documents, query)
+            show_documents(found)
+        elif choice == 4:
+            show_expiring(documents)
+        elif choice == 5:
+            show_statistics(documents)
+        elif choice == 6:
+            for doc in get_expiring_documents(documents, threshold=30):
+                print(format_notification(USER_NAME, doc["title"], doc["days_left"]))
+        elif choice == 0:
+            save_documents(documents)
+            print("До свидания.")
+            break
+        else:
+            print("Нет такого пункта.")
+
+
+if __name__ == "__main__":
+    menu()
