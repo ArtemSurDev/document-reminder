@@ -1,0 +1,9 @@
+[flake8]
+exclude =
+    .venv,
+    venv,
+    .git,
+    __pycache__,
+    .pytest_cache,
+    .idea
+max-line-length = 100

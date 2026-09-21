@@ -1,5 +1,4 @@
 from datetime import date
-import pytest
 
 from documents import (
     add_document, find_documents, days_until_expiry,
