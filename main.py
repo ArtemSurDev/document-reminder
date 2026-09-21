@@ -4,7 +4,13 @@ from documents import (
     add_document, find_documents, get_status, format_notification,
     get_expiring_documents, sort_documents_by_expiry, get_statistics,
 )
-from storage import load_documents, save_documents
+from users import add_user
+from notifications import create_notification, add_notification
+from storage import (
+    load_documents, save_documents,
+    load_users, save_users,
+    load_notifications, save_notifications,
+)
 from utils import input_int, input_date, input_str
 
 
@@ -43,6 +49,9 @@ def show_statistics(documents: list[dict]) -> None:
 
 def menu() -> None:
     documents = load_documents()
+    users = load_users()
+    notifications = load_notifications()
+
     while True:
         print("\n=== Сервис напоминаний о сроках документов ===")
         print("1. Показать все документы")
@@ -51,6 +60,7 @@ def menu() -> None:
         print("4. Показать ближайшие сроки")
         print("5. Показать статистику")
         print("6. Показать напоминания")
+        print("7. Добавить пользователя")
         print("0. Выход")
         choice = input_int("Выберите действие: ")
 
@@ -73,9 +83,22 @@ def menu() -> None:
             show_statistics(documents)
         elif choice == 6:
             for doc in get_expiring_documents(documents, threshold=30):
-                print(format_notification(USER_NAME, doc["title"], doc["days_left"]))
+                message = format_notification(USER_NAME, doc["title"],
+                                              doc["days_left"])
+                print(message)
+                note = create_notification(1, doc["id"], message)
+                add_notification(notifications, note)
+            save_notifications(notifications)
+        elif choice == 7:
+            name = input_str("Имя пользователя: ")
+            email = input_str("Email: ")
+            add_user(users, name, email)
+            save_users(users)
+            print("Пользователь добавлен.")
         elif choice == 0:
             save_documents(documents)
+            save_users(users)
+            save_notifications(notifications)
             print("До свидания.")
             break
         else:

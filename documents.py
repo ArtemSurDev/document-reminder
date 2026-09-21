@@ -2,13 +2,14 @@ from datetime import date
 
 
 def add_document(documents: list[dict], title: str, number: str,
-                 expiry: date) -> dict:
+                 expiry: date, owner_id: int = 1) -> dict:
     doc_id = len(documents) + 1
     doc = {
         "id": doc_id,
         "title": title,
         "number": number,
         "expiry": expiry.isoformat(),
+        "owner_id": owner_id,
     }
     documents.append(doc)
     return doc
@@ -43,7 +44,8 @@ def format_notification(user: str, title: str, days_left: int) -> str:
     return f"{user}, до окончания «{title}» осталось {days_left} дн."
 
 
-def get_expiring_documents(documents: list[dict], threshold: int = 30) -> list[dict]:
+def get_expiring_documents(documents: list[dict],
+                           threshold: int = 30) -> list[dict]:
     today = date.today()
     result = []
     for doc in documents:

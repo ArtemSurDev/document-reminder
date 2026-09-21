@@ -56,7 +56,7 @@ def test_sort_documents_by_expiry():
 
 def test_get_statistics():
     docs = []
-    add_document(docs, "A", "1", date(2020, 1, 1))  # просрочен
+    add_document(docs, "A", "1", date(2020, 1, 1))
     stats = get_statistics(docs)
     assert stats["total"] == 1
     assert stats["expired"] == 1
