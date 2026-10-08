@@ -5,7 +5,6 @@ from .users import User, find_user_by_id
 
 
 class Document:
-    """Документ с ограниченным сроком действия."""
 
     def __init__(self, doc_id: int, title: str, number: str,
                  expiry: date, owner: User) -> None:

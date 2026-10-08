@@ -2,6 +2,7 @@
 venv/
 env/
 .venv/
+.venv1/
 ENV/
 
 # ---------- Python ----------
@@ -29,8 +30,18 @@ dist/
 *.sqlite3
 db.sqlite3
 
+# ---------- Django ----------
+staticfiles/
+media/
+
 # ---------- Логи ----------
 *.log
+
+# ---------- Кэши инструментов ----------
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 # ---------- macOS ----------
 .DS_Store

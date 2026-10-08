@@ -63,3 +63,11 @@ def show_notifications(notifications: list[Notification]) -> None:
         return
     for note in notifications:
         print(note)
+
+
+def find_notification_by_id(notifications: list[Notification],
+                            note_id: int) -> Notification | None:
+    for note in notifications:
+        if note.id == note_id:
+            return note
+    return None
