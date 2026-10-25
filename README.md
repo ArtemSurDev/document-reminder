@@ -28,49 +28,16 @@
 
 Пользователь системы. Атрибуты: `id`, `name`, `email`.
 
-Методы:
-- `__init__` — создание объекта;
-- `__str__` — строковое представление;
-- `from_data` — создание объекта из словаря (classmethod);
-- `to_dict` — преобразование объекта в словарь для JSON.
-
 ### Document
 
 Документ с ограниченным сроком действия. Атрибуты: `id`, `title`,
 `number`, `expiry`, `owner` (объект `User`).
-
-Методы:
-- `__init__` — создание объекта;
-- `__str__` — строковое представление;
-- `days_until_expiry` — количество дней до окончания срока;
-- `get_status` — определение статуса документа;
-- `format_notification` — формирование текста уведомления;
-- `from_data` — создание объекта из словаря (classmethod);
-- `to_dict` — преобразование объекта в словарь для JSON.
 
 ### Notification
 
 Уведомление о приближении или наступлении срока. Атрибуты: `id`,
 `user` (объект `User`), `document` (объект `Document`), `message`,
 `created`.
-
-Методы:
-- `__init__` — создание объекта;
-- `__str__` — строковое представление;
-- `from_data` — создание объекта из словаря (classmethod);
-- `to_dict` — преобразование объекта в словарь для JSON.
-
-## Взаимодействие объектов
-
-Объект `Document` хранит ссылку на `User` (владельца документа),
-а объект `Notification` — ссылки на `User` и `Document`. Благодаря
-этому данные связанных объектов доступны напрямую: `document.owner.name`,
-`notification.document.title`.
-
-Коллекции проекта:
-- `list[User]` — пользователи;
-- `list[Document]` — документы;
-- `list[Notification]` — уведомления.
 
 ## Веб-интерфейс (ПР5–ПР6)
 
@@ -87,93 +54,64 @@
 - В шаблонах используются циклы `{% for %}`, условия `{% if %}` и фильтры (`|length`, `|default`).
 - Ссылки формируются через именованные URL и пространства имен (`{% url %}`).
 - Подключены статические файлы через `{% load static %}` (собственный CSS, JS, логотип).
-- Генерация HTML в Python-коде (функция `page()`) полностью убрана. View-функции используют `render()`.
 
 ### Страницы веб-интерфейса
 
-- `/` — главная страница: описание приложения и навигация
-  (view-функция `index`);
-- `/documents/` — список документов из `data/documents.json`
-  (view-функция `document_list`);
-- `/documents/<int:document_id>/` — страница документа
-  (view-функция `document_detail`);
-- `/notifications/` — список уведомлений
-  (view-функция `notification_list`);
-- `/notifications/<int:notification_id>/` — страница уведомления
-  (view-функция `notification_detail`).
+- `/` — главная страница: описание приложения и навигация;
+- `/documents/` — список всех документов;
+- `/documents/<int:document_id>/` — страница конкретного документа;
+- `/documents/available/` — поиск документов по дате;
+- `/notifications/` — список уведомлений;
+- `/notifications/<int:notification_id>/` — страница конкретного уведомления;
+- `/notifications/statistics/` — статистика по документам пользователей.
 
-Если документ или уведомление с указанным идентификатором не найдено,
-возвращается код 404 с собственной страницей проекта.
+## Слой базы данных (ПР7)
 
-### Навигация и оформление
+В ПР7 данные проекта перенесены из JSON-файлов в реляционную базу данных SQLite.
+Django ORM на данном этапе не используется. Работа с базой выполняется через стандартную библиотеку Python `sqlite3`.
 
-Используется Bootstrap 5.3 (подключён через CDN). Навигационная панель
-вынесена в отдельный шаблон `templates/includes/navigation.html`.
-Собственные стили находятся в `homepage/static/homepage/css/style.css`.
-JavaScript выводит текущий год в подвале (`homepage/static/homepage/js/main.js`).
+### Структура базы данных
 
-### Запуск веб-приложения
+Файл базы данных: `data/document_reminder.sqlite`.
+Схема базы данных описана в файле: `sql/schema.sql`.
 
-    python manage.py runserver
+Таблицы:
+- `users` — пользователи (поля: `id`, `name`, `email`);
+- `documents` — документы (поля: `id`, `title`, `number`, `expiry`, `owner_id`);
+- `notifications` — уведомления (поля: `id`, `user_id`, `document_id`, `message`, `created`).
 
-После запуска открыть в браузере:
+Определены первичные ключи (`id`) и внешние ключи (`owner_id`, `user_id`, `document_id`).
 
-    http://127.0.0.1:8000/
+### SQL-запросы
 
-### Что пока не реализовано в веб-интерфейсе
+Все запросы проекта сохранены в файле `sql/queries.sql`. Реализованы:
+- выборка списков (`SELECT`);
+- фильтрация (`WHERE`);
+- соединение таблиц (`JOIN`);
+- агрегатные функции (`COUNT`);
+- группировка данных (`GROUP BY`).
 
-На ПР6 веб-интерфейс реализует только отображение данных. Создание,
-редактирование и удаление документов через веб-формы будут добавлены
-в следующих практических работах вместе с Django Forms и Django ORM.
-Консольная версия сохраняет весь функционал ПР3.
+### Модули базы данных
+
+- `db/database.py` — функция подключения к базе данных с включенной проверкой внешних ключей (`PRAGMA foreign_keys = ON`);
+- `db/import_json.py` — скрипт для переноса данных из JSON-файлов в SQLite.
 
 ## Структура проекта
 
 - `manage.py` — точка входа Django-проекта;
-- `document_reminder/` — пакет настроек Django:
-  - `settings.py` — настройки проекта;
-  - `urls.py` — маршрутизация верхнего уровня;
-  - `asgi.py`, `wsgi.py` — точки входа для серверов;
-- `templates/` — шаблоны уровня проекта:
-  - `base.html` — базовый шаблон;
-  - `includes/navigation.html` — навигация;
-- `homepage/` — Django-приложение главной страницы:
-  - `views.py` — view `index`, `page_not_found`;
-  - `urls.py` — маршрут главной страницы;
-  - `templates/homepage/` — `index.html`, `404.html`;
-  - `static/homepage/` — `css/style.css`, `js/main.js`, `img/logo.png`;
-- `documents/` — Django-приложение документов:
-  - `views.py` — view `document_list`, `document_detail`;
-  - `urls.py` — маршруты приложения;
-  - `templates/documents/` — `document_list.html`, `document_detail.html`, `includes/document_card.html`;
-- `notifications/` — Django-приложение уведомлений:
-  - `views.py` — view `notification_list`, `notification_detail`;
-  - `urls.py` — маршруты приложения;
-  - `templates/notifications/` — `notification_list.html`, `notification_detail.html`, `includes/notification_status.html`;
-- `models/` — пакет с классами предметной области (ПР3):
-  - `models/__init__.py` — экспорт классов;
-  - `models/users.py` — класс `User` и функции работы с пользователями;
-  - `models/documents.py` — класс `Document` и функции работы с документами;
-  - `models/notifications.py` — класс `Notification` и функции работы с уведомлениями;
-- `storage.py` — загрузка и сохранение JSON с преобразованием в объекты;
-- `utils.py` — безопасный ввод (для консольной версии);
-- `main.py` — точка входа консольного приложения (ПР3);
-- `data/users.json` — данные о пользователях;
-- `data/documents.json` — данные о документах;
-- `data/notifications.json` — данные об уведомлениях;
+- `document_reminder/` — пакет настроек Django;
+- `templates/` — шаблоны уровня проекта (`base.html`, `includes/navigation.html`);
+- `homepage/` — приложение главной страницы;
+- `documents/` — приложение документов;
+- `notifications/` — приложение уведомлений;
+- `models/` — пакет с классами предметной области (ПР3);
+- `storage.py` — загрузка и сохранение JSON (для консольной версии);
+- `db/` — модули подключения к SQLite и импорта данных;
+- `sql/` — SQL-скрипты (схема и запросы);
+- `data/` — файлы данных (JSON и файл базы данных `.sqlite`);
 - `tests/` — автоматизированные тесты (ПР3);
 - `requirements.txt` — зависимости проекта;
 - `README.md` — документация проекта.
-
-## Формат хранения данных
-
-JSON-файлы хранят идентификаторы связанных объектов. При загрузке
-`storage.py` восстанавливает объекты `User`, `Document` и `Notification`
-и связывает их между собой.
-
-При сохранении объекты преобразуются обратно в словари: вместо объектов
-`User` и `Document` в JSON записываются их идентификаторы (`owner_id`,
-`user_id`, `document_id`).
 
 ## Требования
 
