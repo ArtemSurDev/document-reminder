@@ -1,22 +1,57 @@
+import sqlite3
 from django.shortcuts import render
 
-from models.notifications import find_notification_by_id
-from storage import load_notifications
+DB_PATH = "data/document_reminder.sqlite"
 
 
 def notification_list(request):
-    notes = load_notifications()
-    context = {"notifications": notes}
-    return render(request, "notifications/notification_list.html", context)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    notifications = conn.execute("""
+        SELECT notifications.id, notifications.message, notifications.created,
+               users.name AS user_name, documents.title AS doc_title
+        FROM notifications
+        JOIN users ON notifications.user_id = users.id
+        JOIN documents ON notifications.document_id = documents.id
+        ORDER BY notifications.created DESC
+    """).fetchall()
+    conn.close()
+
+    return render(request, "notifications/notification_list.html",
+                  {"notifications": notifications})
 
 
 def notification_detail(request, notification_id):
-    notes = load_notifications()
-    note = find_notification_by_id(notes, notification_id)
-    context = {"notification": note}
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    notification = conn.execute("""
+        SELECT notifications.id, notifications.message, notifications.created,
+               users.name AS user_name, documents.title AS doc_title
+        FROM notifications
+        JOIN users ON notifications.user_id = users.id
+        JOIN documents ON notifications.document_id = documents.id
+        WHERE notifications.id = ?
+    """, (notification_id,)).fetchone()
+    conn.close()
+
     return render(
         request,
         "notifications/notification_detail.html",
-        context,
-        status=404 if note is None else 200,
+        {"notification": notification},
+        status=404 if notification is None else 200,
     )
+
+
+def statistics(request):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    stats = conn.execute("""
+        SELECT users.name AS user_name, COUNT(documents.id) AS doc_count
+        FROM users
+        LEFT JOIN documents ON users.id = documents.owner_id
+        GROUP BY users.id, users.name
+        ORDER BY doc_count DESC
+    """).fetchall()
+    conn.close()
+
+    return render(request, "notifications/statistics.html", {"stats": stats})

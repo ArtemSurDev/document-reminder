@@ -1,36 +1,67 @@
-from datetime import date
+import sqlite3
 from django.shortcuts import render
 
-from models.documents import find_document_by_id
-from storage import load_documents
+DB_PATH = "data/document_reminder.sqlite"
 
 
 def document_list(request):
-    docs = load_documents()
-    today = date.today()
-    for doc in docs:
-        days_left = doc.days_until_expiry(today)
-        doc.days_left = days_left
-        doc.status = doc.get_status(days_left)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    documents = conn.execute("""
+                             SELECT documents.id,
+                                    documents.title,
+                                    documents.number,
+                                    documents.expiry,
+                                    users.name AS owner_name
+                             FROM documents
+                                      JOIN users ON documents.owner_id = users.id
+                             ORDER BY documents.expiry
+                             """).fetchall()
+    conn.close()
 
-    context = {"documents": docs}
-    return render(request, "documents/document_list.html", context)
+    return render(request, "documents/document_list.html", {"documents": documents})
 
 
 def document_detail(request, document_id):
-    docs = load_documents()
-    doc = find_document_by_id(docs, document_id)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    document = conn.execute("""
+                            SELECT documents.id,
+                                   documents.title,
+                                   documents.number,
+                                   documents.expiry,
+                                   users.name AS owner_name
+                            FROM documents
+                                     JOIN users ON documents.owner_id = users.id
+                            WHERE documents.id = ?
+                            """, (document_id,)).fetchone()
+    conn.close()
 
-    if doc is not None:
-        today = date.today()
-        days_left = doc.days_until_expiry(today)
-        doc.days_left = days_left
-        doc.status = doc.get_status(days_left)
-
-    context = {"document": doc}
     return render(
         request,
         "documents/document_detail.html",
-        context,
-        status=404 if doc is None else 200,
+        {"document": document},
+        status=404 if document is None else 200,
+    )
+
+
+def available_documents(request):
+    search_date = request.GET.get("date")
+    documents = []
+
+    if search_date:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        documents = conn.execute("""
+                                 SELECT id, title, expiry
+                                 FROM documents
+                                 WHERE expiry >= ?
+                                 ORDER BY expiry
+                                 """, (search_date,)).fetchall()
+        conn.close()
+
+    return render(
+        request,
+        "documents/available.html",
+        {"documents": documents, "search_date": search_date}
     )

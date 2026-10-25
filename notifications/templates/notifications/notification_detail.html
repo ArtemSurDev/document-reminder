@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}
-{% if notification %}Уведомление №{{ notification.id }} — Сервис напоминаний{% else %}Уведомление не найдено{% endif %}
-{% endblock %}
+{% block title %}Уведомление №{{ notification.id }}{% endblock %}
 
 {% block content %}
 {% if notification %}
@@ -10,17 +8,14 @@
     <div class="card-body">
         <h1 class="card-title">Уведомление №{{ notification.id }}</h1>
         <p class="card-text"><strong>Дата:</strong> {{ notification.created }}</p>
-        <p class="card-text"><strong>Пользователь:</strong> {{ notification.user.name }}</p>
-        <p class="card-text"><strong>Документ:</strong> {{ notification.document.title }}</p>
+        <p class="card-text"><strong>Пользователь:</strong> {{ notification.user_name }}</p>
+        <p class="card-text"><strong>Документ:</strong> {{ notification.doc_title }}</p>
         <p class="card-text"><strong>Сообщение:</strong> {{ notification.message }}</p>
     </div>
 </div>
 {% else %}
 <h1 class="text-danger">Уведомление не найдено</h1>
-<p>Уведомление с указанным идентификатором отсутствует.</p>
 {% endif %}
 
-<a href="{% url 'notifications:list' %}" class="btn btn-outline-secondary mt-3">
-    ← к списку уведомлений
-</a>
+<a href="{% url 'notifications:list' %}" class="btn btn-outline-secondary mt-3">← к списку уведомлений</a>
 {% endblock %}

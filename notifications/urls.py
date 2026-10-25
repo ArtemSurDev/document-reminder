@@ -6,4 +6,5 @@ app_name = "notifications"
 urlpatterns = [
     path("", views.notification_list, name="list"),
     path("<int:notification_id>/", views.notification_detail, name="detail"),
+    path("statistics/", views.statistics, name="statistics"),
 ]

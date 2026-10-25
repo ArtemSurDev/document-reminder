@@ -8,15 +8,12 @@
 
 <ul class="list-group">
     {% for note in notifications %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-                <a href="{% url 'notifications:detail' note.id %}">
-                    {{ note.document.title }} — {{ note.created }}
-                </a>
-                <br>
-                <small class="text-muted">{{ note.user.name }}</small>
-            </div>
-            {% include "notifications/includes/notification_status.html" %}
+        <li class="list-group-item">
+            <a href="{% url 'notifications:detail' note.id %}">
+                {{ note.doc_title }} — {{ note.created }}
+            </a>
+            <br>
+            <small class="text-muted">{{ note.user_name }}: {{ note.message }}</small>
         </li>
     {% empty %}
         <li class="list-group-item">Уведомления не найдены.</li>
