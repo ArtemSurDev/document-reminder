@@ -72,21 +72,33 @@
 - `list[Document]` — документы;
 - `list[Notification]` — уведомления.
 
-## Веб-интерфейс (ПР5)
+## Веб-интерфейс (ПР5–ПР6)
 
 Проект переведён на Django 5.2. Создан Django-проект `document_reminder`
 и три Django-приложения: `homepage`, `documents`, `notifications`.
+
+### Django Template Language (ПР6)
+
+Веб-часть проекта переведена на систему шаблонов Django.
+- Создан базовый шаблон `base.html`, настроено наследование через `{% extends %}`.
+- Используются блоки `{% block title %}` и `{% block content %}`.
+- Повторяющиеся элементы вынесены в подключаемые шаблоны `{% include %}` (навигация, карточки, статусы).
+- Данные передаются в шаблоны через контекст из `views.py`.
+- В шаблонах используются циклы `{% for %}`, условия `{% if %}` и фильтры (`|length`, `|default`).
+- Ссылки формируются через именованные URL и пространства имен (`{% url %}`).
+- Подключены статические файлы через `{% load static %}` (собственный CSS, JS, логотип).
+- Генерация HTML в Python-коде (функция `page()`) полностью убрана. View-функции используют `render()`.
 
 ### Страницы веб-интерфейса
 
 - `/` — главная страница: описание приложения и навигация
   (view-функция `index`);
 - `/documents/` — список документов из `data/documents.json`
-  (view-функция `documents`);
+  (view-функция `document_list`);
 - `/documents/<int:document_id>/` — страница документа
   (view-функция `document_detail`);
 - `/notifications/` — список уведомлений
-  (view-функция `notifications`);
+  (view-функция `notification_list`);
 - `/notifications/<int:notification_id>/` — страница уведомления
   (view-функция `notification_detail`).
 
@@ -96,8 +108,9 @@
 ### Навигация и оформление
 
 Используется Bootstrap 5.3 (подключён через CDN). Навигационная панель
-и общий каркас страниц формируются функцией `page()` в
-`homepage/views.py`.
+вынесена в отдельный шаблон `templates/includes/navigation.html`.
+Собственные стили находятся в `homepage/static/homepage/css/style.css`.
+JavaScript выводит текущий год в подвале (`homepage/static/homepage/js/main.js`).
 
 ### Запуск веб-приложения
 
@@ -109,7 +122,7 @@
 
 ### Что пока не реализовано в веб-интерфейсе
 
-На ПР5 веб-интерфейс реализует только отображение данных. Создание,
+На ПР6 веб-интерфейс реализует только отображение данных. Создание,
 редактирование и удаление документов через веб-формы будут добавлены
 в следующих практических работах вместе с Django Forms и Django ORM.
 Консольная версия сохраняет весь функционал ПР3.
@@ -121,15 +134,22 @@
   - `settings.py` — настройки проекта;
   - `urls.py` — маршрутизация верхнего уровня;
   - `asgi.py`, `wsgi.py` — точки входа для серверов;
+- `templates/` — шаблоны уровня проекта:
+  - `base.html` — базовый шаблон;
+  - `includes/navigation.html` — навигация;
 - `homepage/` — Django-приложение главной страницы:
-  - `views.py` — функция `page()` и view `index`;
+  - `views.py` — view `index`, `page_not_found`;
   - `urls.py` — маршрут главной страницы;
+  - `templates/homepage/` — `index.html`, `404.html`;
+  - `static/homepage/` — `css/style.css`, `js/main.js`, `img/logo.png`;
 - `documents/` — Django-приложение документов:
-  - `views.py` — view `documents`, `document_detail`;
+  - `views.py` — view `document_list`, `document_detail`;
   - `urls.py` — маршруты приложения;
+  - `templates/documents/` — `document_list.html`, `document_detail.html`, `includes/document_card.html`;
 - `notifications/` — Django-приложение уведомлений:
-  - `views.py` — view `notifications`, `notification_detail`;
+  - `views.py` — view `notification_list`, `notification_detail`;
   - `urls.py` — маршруты приложения;
+  - `templates/notifications/` — `notification_list.html`, `notification_detail.html`, `includes/notification_status.html`;
 - `models/` — пакет с классами предметной области (ПР3):
   - `models/__init__.py` — экспорт классов;
   - `models/users.py` — класс `User` и функции работы с пользователями;
@@ -157,7 +177,7 @@ JSON-файлы хранят идентификаторы связанных о�
 
 ## Требования
 
-- Python 3.10+ (используется синтаксис `X | Y` для аннотаций типов);
+- Python 3.10+;
 - Django 5.2;
 - pytest;
 - flake8.
@@ -183,9 +203,3 @@ JSON-файлы хранят идентификаторы связанных о�
 Проверка кода:
 
     flake8
-
-## План развития
-
-- ПР6 — Django-шаблоны, контекст, наследование шаблонов;
-- ПР7 — Django ORM, база данных, модели;
-- ПР8+ — формы, пользователи, аутентификация, API, Docker.

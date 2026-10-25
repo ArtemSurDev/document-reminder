@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if document %}{{ document.title }} — Сервис напоминаний{% else %}Документ не найден{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if document %}
+<div class="card">
+    <div class="card-body">
+        <h1 class="card-title">{{ document.title }}</h1>
+        <p class="card-text"><strong>Номер:</strong> {{ document.number }}</p>
+        <p class="card-text"><strong>Владелец:</strong> {{ document.owner.name }}</p>
+        <p class="card-text"><strong>Действителен до:</strong> {{ document.expiry }}</p>
+        <p class="card-text">
+            <strong>До окончания:</strong> {{ document.days_left }} дн.
+            <span class="badge
+                {% if document.status == 'ПРОСРОЧЕН' %}bg-danger
+                {% elif document.status == 'ИСТЕКАЕТ СЕГОДНЯ' %}bg-warning
+                {% elif document.status == 'ИСТЕКАЕТ СКОРО' %}bg-warning
+                {% else %}bg-success{% endif %}">
+                {{ document.status }}
+            </span>
+        </p>
+    </div>
+</div>
+{% else %}
+<h1 class="text-danger">Документ не найден</h1>
+<p>Документ с указанным идентификатором отсутствует.</p>
+{% endif %}
+
+<a href="{% url 'documents:list' %}" class="btn btn-outline-secondary mt-3">
+    ← к списку документов
+</a>
+{% endblock %}

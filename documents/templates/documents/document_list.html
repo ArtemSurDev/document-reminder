@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Документы — Сервис напоминаний{% endblock %}
+
+{% block content %}
+<h1>Документы</h1>
+<p>Всего документов: {{ documents|length }}</p>
+
+<div class="row">
+    {% for doc in documents %}
+        {% include "documents/includes/document_card.html" %}
+    {% empty %}
+        <p>Документы не найдены.</p>
+    {% endfor %}
+</div>
+{% endblock %}

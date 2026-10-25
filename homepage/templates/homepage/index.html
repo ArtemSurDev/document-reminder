@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — Сервис напоминаний{% endblock %}
+
+{% block content %}
+<h1 class="display-4">Сервис напоминаний о сроках документов</h1>
+<p class="lead">Учёт документов и контроль сроков их действия.</p>
+<p>Основные разделы:</p>
+<a href="{% url 'documents:list' %}" class="btn btn-primary me-2">Документы</a>
+<a href="{% url 'notifications:list' %}" class="btn btn-secondary">Уведомления</a>
+{% endblock %}

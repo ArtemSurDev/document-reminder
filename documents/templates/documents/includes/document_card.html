@@ -1,0 +1,24 @@
+<div class="col-md-6 mb-3">
+    <article class="card document-card">
+        <div class="card-body">
+            <h2 class="card-title h5">
+                {{ doc.title|default:"Без названия" }}
+            </h2>
+            <p class="card-text">
+                <strong>Номер:</strong> {{ doc.number }}<br>
+                <strong>Действителен до:</strong> {{ doc.expiry }}<br>
+                <strong>До окончания:</strong> {{ doc.days_left }} дн.
+            </p>
+            <p>
+                <span class="badge
+                    {% if doc.status == 'ПРОСРОЧЕН' %}bg-danger
+                    {% elif doc.status == 'ИСТЕКАЕТ СЕГОДНЯ' %}bg-warning
+                    {% elif doc.status == 'ИСТЕКАЕТ СКОРО' %}bg-warning
+                    {% else %}bg-success{% endif %}">
+                    {{ doc.status }}
+                </span>
+            </p>
+            <a href="{% url 'documents:detail' doc.id %}" class="btn btn-primary btn-sm">Подробнее</a>
+        </div>
+    </article>
+</div>

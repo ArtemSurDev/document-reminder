@@ -1,0 +1,11 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'homepage:index' %}">
+            Сервис напоминаний
+        </a>
+        <div class="navbar-nav">
+            <a class="nav-link" href="{% url 'documents:list' %}">Документы</a>
+            <a class="nav-link" href="{% url 'notifications:list' %}">Уведомления</a>
+        </div>
+    </div>
+</nav>

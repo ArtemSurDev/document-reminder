@@ -1,56 +1,22 @@
-from django.http import HttpResponse
+from django.shortcuts import render
 
-from homepage.views import page
 from models.notifications import find_notification_by_id
 from storage import load_notifications
 
 
-def notifications(request):
+def notification_list(request):
     notes = load_notifications()
-    items = ""
-    for note in notes:
-        items += (
-            f'<li class="list-group-item">'
-            f'<a href="/notifications/{note.id}/">'
-            f'{note.created} — {note.document.title}'
-            f'</a> '
-            f'<span class="text-muted">{note.user.name}</span>'
-            f'</li>'
-        )
-    content = f"""
-    <h1>Уведомления</h1>
-    <ul class="list-group">{items}</ul>
-    """
-    return HttpResponse(page("Уведомления", content))
+    context = {"notifications": notes}
+    return render(request, "notifications/notification_list.html", context)
 
 
-def notification_detail(request, notification_id: int):
+def notification_detail(request, notification_id):
     notes = load_notifications()
     note = find_notification_by_id(notes, notification_id)
-    if note is None:
-        content = """
-        <h1 class="text-danger">Уведомление не найдено</h1>
-        <a href="/notifications/" class="btn btn-outline-secondary">
-            ← к списку уведомлений
-        </a>
-        """
-        return HttpResponse(
-            page("Уведомление не найдено", content),
-            status=404,
-        )
-
-    content = f"""
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Уведомление №{note.id}</h5>
-        <p class="card-text"><strong>Дата:</strong> {note.created}</p>
-        <p class="card-text"><strong>Пользователь:</strong> {note.user.name}</p>
-        <p class="card-text"><strong>Документ:</strong> {note.document.title}</p>
-        <p class="card-text"><strong>Сообщение:</strong> {note.message}</p>
-        <a href="/notifications/" class="btn btn-outline-secondary">
-            ← к списку уведомлений
-        </a>
-      </div>
-    </div>
-    """
-    return HttpResponse(page("Уведомление", content))
+    context = {"notification": note}
+    return render(
+        request,
+        "notifications/notification_detail.html",
+        context,
+        status=404 if note is None else 200,
+    )
