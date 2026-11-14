@@ -10,10 +10,10 @@
     {% for note in notifications %}
         <li class="list-group-item">
             <a href="{% url 'notifications:detail' note.id %}">
-                {{ note.doc_title }} — {{ note.created }}
+                {{ note.document.title }} — {{ note.created }}
             </a>
             <br>
-            <small class="text-muted">{{ note.user_name }}: {{ note.message }}</small>
+            <small class="text-muted">{{ note.user.name }}: {{ note.message }}</small>
         </li>
     {% empty %}
         <li class="list-group-item">Уведомления не найдены.</li>

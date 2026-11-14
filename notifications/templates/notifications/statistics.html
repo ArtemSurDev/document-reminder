@@ -8,7 +8,7 @@
 <div class="list-group">
     {% for item in stats %}
         <div class="list-group-item d-flex justify-content-between align-items-center">
-            <span>{{ item.user_name }}</span>
+            <span>{{ item.name }}</span>
             <span class="badge bg-primary rounded-pill">{{ item.doc_count }} док.</span>
         </div>
     {% empty %}

@@ -4,6 +4,11 @@
 
 {% block content %}
 <h1>Документы</h1>
+
+<a href="{% url 'documents:available' %}" class="btn btn-outline-primary mb-3">
+    🔍 Поиск документов по дате
+</a>
+
 <p>Всего документов: {{ documents|length }}</p>
 
 <div class="row">

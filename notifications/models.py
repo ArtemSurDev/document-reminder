@@ -1,3 +1,27 @@
 from django.db import models
+from users.models import User
+from documents.models import Document
 
-# Create your models here.
+class Notification(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+        verbose_name="Пользователь"
+    )
+    document = models.ForeignKey(
+        Document,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+        verbose_name="Документ"
+    )
+    message = models.TextField(verbose_name="Сообщение")
+    created = models.DateField(verbose_name="Дата создания")
+
+    def __str__(self):
+        return f"Уведомление для {self.user.name}"
+
+    class Meta:
+        ordering = ["-created"]
+        verbose_name = "Уведомление"
+        verbose_name_plural = "Уведомления"
