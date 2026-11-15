@@ -2,6 +2,19 @@ from django.db import models
 from users.models import User
 from documents.models import Document
 
+
+class NotificationQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(created__lte=models.functions.Now())
+
+    def for_document(self, document_id):
+        return self.filter(document_id=document_id)
+
+
+class NotificationManager(models.Manager.from_queryset(NotificationQuerySet)):
+    pass
+
+
 class Notification(models.Model):
     user = models.ForeignKey(
         User,
@@ -17,6 +30,8 @@ class Notification(models.Model):
     )
     message = models.TextField(verbose_name="Сообщение")
     created = models.DateField(verbose_name="Дата создания")
+
+    objects = NotificationManager()
 
     def __str__(self):
         return f"Уведомление для {self.user.name}"

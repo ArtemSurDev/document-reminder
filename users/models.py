@@ -1,7 +1,12 @@
 from django.db import models
 
+
 class User(models.Model):
-    name = models.CharField(max_length=200, verbose_name="Имя пользователя")
+    name = models.CharField(
+        max_length=200,
+        verbose_name="Имя пользователя",
+        help_text="Введите полное имя пользователя",
+    )
     email = models.EmailField(verbose_name="Электронная почта")
 
     def __str__(self):
