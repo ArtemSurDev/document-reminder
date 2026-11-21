@@ -11,4 +11,4 @@ exclude =
     */models.py,
     */apps.py,
     */tests.py
-max-line-length = 100
+max-line-length = 112

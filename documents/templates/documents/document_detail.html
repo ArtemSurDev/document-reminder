@@ -1,23 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}
-{% if document %}{{ document.title }} — Сервис напоминаний{% else %}Документ не найден{% endif %}
-{% endblock %}
+{% block title %}{{ document.title }}{% endblock %}
 
 {% block content %}
-{% if document %}
 <div class="card">
     <div class="card-body">
-        <h1 class="card-title">{{ document.title }}</h1>
-        <p class="card-text"><strong>Номер:</strong> {{ document.number }}</p>
-        <p class="card-text"><strong>Владелец:</strong> {{ document.owner_name }}</p>
-        <p class="card-text"><strong>Действителен до:</strong> {{ document.expiry }}</p>
+        <h1>{{ document.title }}</h1>
+        {% if document.image %}
+            <img src="{{ document.image.url }}" alt="{{ document.title }}" class="img-fluid mb-3" style="max-width: 300px;">
+        {% endif %}
+        <p><strong>Номер:</strong> {{ document.number }}</p>
+        <p><strong>Владелец:</strong> {{ document.owner.name }}</p>
+        <p><strong>Действителен до:</strong> {{ document.expiry }}</p>
+        <p><strong>Статус:</strong> {{ document.get_status_display }}</p>
+
+        <a href="{% url 'documents:edit' document.id %}" class="btn btn-warning">Редактировать</a>
+        <a href="{% url 'documents:delete' document.id %}" class="btn btn-danger">Удалить</a>
+        <a href="{% url 'documents:list' %}" class="btn btn-secondary">Назад</a>
     </div>
 </div>
-{% else %}
-<h1 class="text-danger">Документ не найден</h1>
-<p>Документ с указанным идентификатором отсутствует.</p>
-{% endif %}
-
-<a href="{% url 'documents:list' %}" class="btn btn-outline-secondary mt-3">← к списку документов</a>
 {% endblock %}

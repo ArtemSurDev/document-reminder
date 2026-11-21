@@ -1,19 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %}Документы — Сервис напоминаний{% endblock %}
+{% block title %}Документы{% endblock %}
 
 {% block content %}
 <h1>Документы</h1>
+<a href="{% url 'documents:create' %}" class="btn btn-success mb-3">+ Добавить документ</a>
 
-<a href="{% url 'documents:available' %}" class="btn btn-outline-primary mb-3">
-    🔍 Поиск документов по дате
-</a>
-
-<p>Всего документов: {{ documents|length }}</p>
+<form method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-4">{{ form.expiry_date }}</div>
+        <div class="col-md-4">{{ form.owner }}</div>
+        <div class="col-md-2"><button type="submit" class="btn btn-primary">Фильтр</button></div>
+    </div>
+</form>
 
 <div class="row">
     {% for doc in documents %}
-        {% include "documents/includes/document_card.html" %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ doc.title }}</h5>
+                    <p class="card-text">До: {{ doc.expiry }}</p>
+                    <a href="{% url 'documents:detail' doc.id %}" class="btn btn-primary btn-sm">Подробнее</a>
+                </div>
+            </div>
+        </div>
     {% empty %}
         <p>Документы не найдены.</p>
     {% endfor %}
